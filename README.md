@@ -30,3 +30,8 @@ Run the program:
 ```bash
 python main.py
 ```
+
+Stop the program:
+```bash
+ctrl + c
+```
