@@ -20,15 +20,20 @@ def read_test():
     
     return_volatility_dict = {}
     monthly_returns_dataframe = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")
+
+
     
-    # Calculating annualized average return and variance
+    # Calculating annualized average return and volatility
     for isin in isin_list:
         stock_movements = monthly_returns_dataframe[isin].dropna()
         months = len(stock_movements)
+        # Removes items without data
+        if months == 0:
+            continue
         yearly_returns = []
         # Calculates yearly returns
-        while months >= 12:
-            monthly_returns = stock_movements.iloc[months-12: months]
+        while months > 0:
+            monthly_returns = stock_movements.iloc[max(0,months-12): months]
             yearly_return = 1
             for monthly_return in monthly_returns:
                 yearly_return = yearly_return * (1+monthly_return)
@@ -42,14 +47,14 @@ def read_test():
             partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
             annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
 
-            # Calculates the volatility
-            partial_calculation_inner_sum = 0
-            for stock_movement in stock_movements:
-                partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
-            sigma = math.sqrt(partial_calculation_inner_sum / len(stock_movements))
-            volatility = math.sqrt(12) * sigma
+        # Calculates the volatility
+        partial_calculation_inner_sum = 0
+        for stock_movement in stock_movements:
+            partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
+        sigma = math.sqrt(partial_calculation_inner_sum / len(stock_movements))
+        volatility = math.sqrt(12) * sigma
 
-            return_volatility_dict[isin] =  (volatility, annualized_average_return_in_percentage)
+        return_volatility_dict[isin] =  (volatility, annualized_average_return_in_percentage)
 
     # Remove huge outliers
     outliers = []
@@ -69,7 +74,10 @@ def read_test():
         y_array = np.append(y_array,[y])
     z = np.polyfit(x_array, y_array, 1)
     p = np.poly1d(z)
+    plt.xlabel('Volatility')
+    plt.ylabel('Return')
     plt.plot(x_array,p(x_array),"r--")
+    print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
     
