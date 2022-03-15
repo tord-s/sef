@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-def read_test():
-
+def get_relevant_isins_and_montly_returns():
     # Extracting all country codes for emerging countries
     countires_to_regions = pd.read_excel("data/CountriesToRegions.xlsx", sheet_name="Feuil1")
     em_country_codes_raw = list(countires_to_regions.loc[countires_to_regions["Unnamed: 4"] == "{'EM'}"]["function Corresp = CodetoName"])
@@ -18,18 +17,42 @@ def read_test():
 
     # TODO: Filter on ones with governence score
     
-    return_volatility_dict = {}
     monthly_returns_dataframe = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")
 
+    # Removes items without data
+    stocks_without_data = []
+    for isin in isin_list:
+        stock_movements = monthly_returns_dataframe[isin].dropna()
+        if len(stock_movements) == 0:
+            stocks_without_data.append(isin)
+    for stock in stocks_without_data:
+        isin_list.remove(stock)
+    return isin_list, monthly_returns_dataframe
 
+def plot_dict(return_volatility_dict):
+    # Plot results in scatter plot
+    x_array, y_array = np.array([]), np.array([]) 
+    for value in return_volatility_dict.values():
+        x, y = value[0], value[1]
+        plt.plot(x, y, 'bo')
+        x_array = np.append(x_array,[x])
+        y_array = np.append(y_array,[y])
+    z = np.polyfit(x_array, y_array, 1)
+    p = np.poly1d(z)
+    plt.xlabel('Volatility')
+    plt.ylabel('Return')
+    plt.plot(x_array,p(x_array),"r--")
+    print("Close diagram or press ctrl/cmd + c in terminal to quit program")
+    plt.show()
+
+def task_1():
+    return_volatility_dict = {}
+    isin_list, monthly_returns_dataframe = get_relevant_isins_and_montly_returns()
     
     # Calculating annualized average return and volatility
     for isin in isin_list:
         stock_movements = monthly_returns_dataframe[isin].dropna()
         months = len(stock_movements)
-        # Removes items without data
-        if months == 0:
-            continue
         yearly_returns = []
         # Calculates yearly returns
         while months > 0:
@@ -64,23 +87,41 @@ def read_test():
     for outlier in outliers:
         return_volatility_dict.pop(outlier)
     print("Removed huge outliers: ", outliers)
+    plot_dict(return_volatility_dict)
 
-    # Plot results in scatter plot
-    x_array, y_array = np.array([]), np.array([]) 
-    for value in return_volatility_dict.values():
-        x, y = value[0], value[1]
-        plt.plot(x, y, 'bo')
-        x_array = np.append(x_array,[x])
-        y_array = np.append(y_array,[y])
-    z = np.polyfit(x_array, y_array, 1)
-    p = np.poly1d(z)
-    plt.xlabel('Volatility')
-    plt.ylabel('Return')
-    plt.plot(x_array,p(x_array),"r--")
-    print("Close diagram or press ctrl/cmd + c in terminal to quit program")
-    plt.show()
+def task_2():
+    isin_list, monthly_returns_dataframe = get_relevant_isins_and_montly_returns()
+    # Equaly weighted
+    max_months = 0
+    weight_dict = {}
+    for isin in isin_list:
+        length = len(monthly_returns_dataframe[isin].dropna())
+        if length > max_months:
+            max_months = length
+    for isin in isin_list:
+        weight_dict[isin] = [0] * max_months
+    month_weight_dict = {}
+    for month_nr in range(max_months):
+        nr_of_stocks_with_data_for_month = 0
+        for isin in isin_list:
+            if len(monthly_returns_dataframe[isin].dropna()) > month_nr:
+                nr_of_stocks_with_data_for_month += 1
+        month_weight_dict[month_nr] = (1 / nr_of_stocks_with_data_for_month)
+    for month_nr in range(max_months):
+        for isin in isin_list:
+            if len(monthly_returns_dataframe[isin].dropna()) > month_nr:
+                weight_dict[isin][month_nr] = month_weight_dict[month_nr]
+    print(weight_dict)
+
+        
+        
+        
+            
+        
+    
 
     
 
 if __name__ == "__main__":
-    read_test()
+    task_1()
+    # task_2()
