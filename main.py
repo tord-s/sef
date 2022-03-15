@@ -1,6 +1,8 @@
+from functools import partial
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 def read_test():
 
@@ -12,30 +14,65 @@ def read_test():
     # Extracting all ISINs from the emerging countires
     firm_names_dataframe = pd.read_excel("data/firm_names.xlsx", sheet_name="Feuil1")
     stocks_in_country = firm_names_dataframe.loc[firm_names_dataframe["Country"].isin(em_country_codes)]
-    isin_list = set(stocks_in_country["ISIN"].to_list())
+    isin_list = list(set(stocks_in_country["ISIN"].to_list()))
+
+    # TODO: Filter on ones with governence score
     
-    stocks_with_return_and_variance_dict = {}
+    return_volatility_dict = {}
     monthly_returns_dataframe = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")
-
-    # Attempting to calculate mean and variance - the calculations are probably wrong atm
+    
+    # Calculating annualized average return and variance
     for isin in isin_list:
-        earnings = 0
-        variance = 0
-        n = len(isin_list)
-        stock_movements = monthly_returns_dataframe[isin]
-        for i in range(len(stock_movements)):
-            earnings += stock_movements[i]
-            variance += stock_movements[i]**2
-        stocks_with_return_and_variance_dict[isin] = (earnings, (variance / (n-1)))
+        stock_movements = monthly_returns_dataframe[isin].dropna()
+        months = len(stock_movements)
+        yearly_returns = []
+        # Calculates yearly returns
+        while months >= 12:
+            monthly_returns = stock_movements.iloc[months-12: months]
+            yearly_return = 1
+            for monthly_return in monthly_returns:
+                yearly_return = yearly_return * (1+monthly_return)
+            yearly_returns.append(yearly_return)
+            months -= 12
+        # Calculates annualized_average_return_in_percentage
+        if len(yearly_returns) > 0:
+            partial_calculation_1 = 1
+            for yearly_return in yearly_returns:
+                partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
+            partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
+            annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
 
-    # Remove huge outlier
-    stocks_with_return_and_variance_dict.pop('TH0168A10Z01')
+            # Calculates the volatility
+            partial_calculation_inner_sum = 0
+            for stock_movement in stock_movements:
+                partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
+            sigma = math.sqrt(partial_calculation_inner_sum / len(stock_movements))
+            volatility = math.sqrt(12) * sigma
+
+            return_volatility_dict[isin] =  (volatility, annualized_average_return_in_percentage)
+
+    # Remove huge outliers
+    outliers = []
+    for key, value in return_volatility_dict.items():
+        if value[0] > 50:
+            outliers.append(key)
+    for outlier in outliers:
+        return_volatility_dict.pop(outlier)
+    print("Removed huge outliers: ", outliers)
 
     # Plot results in scatter plot
-    for value in stocks_with_return_and_variance_dict.values():
+    x_array, y_array = np.array([]), np.array([]) 
+    for value in return_volatility_dict.values():
         x, y = value[0], value[1]
         plt.plot(x, y, 'bo')
+        x_array = np.append(x_array,[x])
+        y_array = np.append(y_array,[y])
+    z = np.polyfit(x_array, y_array, 1)
+    p = np.poly1d(z)
+    plt.plot(x_array,p(x_array),"r--")
     plt.show()
+
+    
 
 if __name__ == "__main__":
     read_test()
