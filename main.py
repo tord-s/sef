@@ -27,6 +27,7 @@ def get_relevant_isins_and_montly_returns():
             stocks_without_data.append(isin)
     for stock in stocks_without_data:
         isin_list.remove(stock)
+    print('# of firms used: ', len(isin_list))
     return isin_list, monthly_returns_dataframe
 
 def plot_dict(return_volatility_dict):
@@ -39,16 +40,14 @@ def plot_dict(return_volatility_dict):
         y_array = np.append(y_array,[y])
     z = np.polyfit(x_array, y_array, 1)
     p = np.poly1d(z)
-    plt.xlabel('Volatility')
-    plt.ylabel('Return')
+    plt.xlabel('Annualized volatility')
+    plt.ylabel('Annualized average return')
     plt.plot(x_array,p(x_array),"r--")
     print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
-def task_1():
+def get_return_and_volatility(isin_list, monthly_returns_dataframe):
     return_volatility_dict = {}
-    isin_list, monthly_returns_dataframe = get_relevant_isins_and_montly_returns()
-    
     # Calculating annualized average return and volatility
     for isin in isin_list:
         stock_movements = monthly_returns_dataframe[isin].dropna()
@@ -68,6 +67,7 @@ def task_1():
             for yearly_return in yearly_returns:
                 partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
             partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
+            print(partial_calculation_2 - 1)
             annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
 
         # Calculates the volatility
@@ -79,6 +79,11 @@ def task_1():
 
         return_volatility_dict[isin] =  (volatility, annualized_average_return_in_percentage)
 
+    return return_volatility_dict
+
+def task_1():
+    isin_list, monthly_returns_dataframe = get_relevant_isins_and_montly_returns()
+    return_volatility_dict = get_return_and_volatility(isin_list, monthly_returns_dataframe)
     # Remove huge outliers
     outliers = []
     for key, value in return_volatility_dict.items():
@@ -87,7 +92,11 @@ def task_1():
     for outlier in outliers:
         return_volatility_dict.pop(outlier)
     print("Removed huge outliers: ", outliers)
+    print("Martinus stock", return_volatility_dict["AEA000201011"])
+    print("Martinus stock", return_volatility_dict["AEA001501013"])
+    
     plot_dict(return_volatility_dict)
+  
 
 def task_2():
     isin_list, monthly_returns_dataframe = get_relevant_isins_and_montly_returns()
@@ -104,22 +113,54 @@ def task_2():
     for month_nr in range(max_months):
         nr_of_stocks_with_data_for_month = 0
         for isin in isin_list:
-            if len(monthly_returns_dataframe[isin].dropna()) > month_nr:
+            if (len(monthly_returns_dataframe[isin].dropna())-1) >= month_nr:
                 nr_of_stocks_with_data_for_month += 1
         month_weight_dict[month_nr] = (1 / nr_of_stocks_with_data_for_month)
     for month_nr in range(max_months):
         for isin in isin_list:
-            if len(monthly_returns_dataframe[isin].dropna()) > month_nr:
+            if (len(monthly_returns_dataframe[isin].dropna())-1) >= month_nr:
                 weight_dict[isin][month_nr] = month_weight_dict[month_nr]
-    print(weight_dict)
+                
+    # Calculate returns and volatility
+    portfolio_montly_returns = []
+    stock_returns = monthly_returns_dataframe[isin].dropna()
+    for month_nr in range(max_months):
+        montly_return = 1
+        for isin in isin_list:
+            if weight_dict[isin][month_nr] != 0:
+                montly_return += stock_returns[month_nr] * weight_dict[isin][month_nr]
+        portfolio_montly_returns.append(montly_return)
+ 
+    # Calculates yearly returns
+    yearly_returns = []
+    month_index = max_months
+    while month_index > 0:
+        monthly_returns = portfolio_montly_returns[max(0,month_index-12): month_index]
+        yearly_return = 1
+        for monthly_return in monthly_returns:
+            yearly_return = yearly_return * (monthly_return)
+        yearly_returns.append(yearly_return)
+        month_index -= 12
+    partial_calculation_1 = 1
+    for yearly_return in yearly_returns:
+        partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
+    partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
+    annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
+    print("Annualized average return: ", annualized_average_return_in_percentage)
+    # Calculates the volatility
+    partial_calculation_inner_sum = 0
+    for stock_movement in portfolio_montly_returns:
+        partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
+    sigma = math.sqrt(partial_calculation_inner_sum / len(portfolio_montly_returns))
+    volatility = math.sqrt(12) * sigma
+    print("Annualized volatility: ", volatility)
+
+    # Plot results in scatter plot
+    monthly_returns_in_percentage = np.array(portfolio_montly_returns) * 100
+    plt.plot(monthly_returns_in_percentage)
+    plt.show()
 
         
-        
-        
-            
-        
-    
-
     
 
 if __name__ == "__main__":
