@@ -28,7 +28,9 @@ def calculate_annualized_return_and_variance(portfolio_monthly_returns):
     volatility = math.sqrt(12) * sigma
     return annualized_average_return_in_percentage, volatility
 
-
+def get_min_and_max_return(portfolio_monthly_returns):
+    sorted_returns = sorted(portfolio_monthly_returns)
+    return sorted_returns[0], sorted_returns[-1]
 
 def plot_dict(return_volatility_dict):
     # Plot results in scatter plot
@@ -88,12 +90,13 @@ def main():
     # Only get last 168 months because size.xlsx only has this data
     portfolio_monthly_returns_equally_weighted = portfolio_monthly_returns_equally_weighted[-168:]
 
-    annualized_average_return_in_percentage_ew, volatility_ew = calculate_annualized_return_and_variance(portfolio_monthly_returns_equally_weighted)
+    annualized_average_return_in_percentage_ew, volatility_ew = calculate_annualized_return_and_variance(
+        portfolio_monthly_returns_equally_weighted)
+    min_return_ew, max_return_ew = get_min_and_max_return(portfolio_monthly_returns_equally_weighted)
     
-
+    # Finding the value weighted portfolio
     size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
     total_market_value_each_month = size_sheet.sum(axis=1)
-
     portfolio_monthly_returns_value_weighted = []
 
     for month_nr in range(168):
@@ -109,11 +112,27 @@ def main():
         portfolio_monthly_returns_value_weighted.append(monthly_return)
 
     annualized_average_return_in_percentage_vw, volatility_vw = calculate_annualized_return_and_variance(portfolio_monthly_returns_value_weighted)
+    min_return_vw, max_return_vw = get_min_and_max_return(portfolio_monthly_returns_value_weighted)
+
+
+    # Sharpe ratio
+    rf_sheet = pd.read_excel("data/devrf.xlsx", sheet_name="Feuil1")
+    avg_rf = rf_sheet.mean()
+    sr_ew = float((annualized_average_return_in_percentage_ew - avg_rf) / volatility_ew)
+    sr_vw = float((annualized_average_return_in_percentage_vw - avg_rf) / volatility_vw)
+
 
     print("Annualized average return value-weighted portfolio: ", annualized_average_return_in_percentage_vw)
     print("Annualized volatility value-weighted portfolio: ", volatility_vw)
+    print("Max return value-weighted portfolio: ", max_return_vw)
+    print("Min return value-weighted portfolio: ", min_return_vw)
+    print("Sharpe ratio value-weighted portfolio: ", sr_vw)
+
     print("Annualized average return equally-weighted portfolio: ", annualized_average_return_in_percentage_ew)
     print("Annualized volatility equally-weighted portfolio: ", volatility_ew)
+    print("Max return equally-weighted portfolio: ", max_return_ew)
+    print("Min return equally-weighted portfolio: ", min_return_ew)
+    print("Sharpe ratio equally-weighted portfolio: ", sr_ew)
 
 
     # Plot results
