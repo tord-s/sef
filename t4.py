@@ -17,10 +17,30 @@ def main():
     'INE257A01026', 'TW0001301000', 'KR7020560009', 'TW0001717007', 'CNE000000KT5', 'RU0007661625',
     'KR7035760008', 'CNE000000Q29', 'CNE000001782'] 
 
-    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1", index_col="Unnamed: 0")[random_firms]
+    
+    # To plot size against return and volatility
+    size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
+    list_with_size = []
+    intersect = list(set(size_sheet.columns.to_list()) & set(random_firms))
+    for isin in intersect:
+        try:
+            a = size_sheet[isin].mean()
+            b = int(a)
+            list_with_size.append((isin, a))
+        except:
+            continue
+    list_with_size.sort(key=lambda y: y[1])
+    biggest_inins = []
+    print(list_with_size)
+    for i in range(len(list_with_size)//3, len(list_with_size)):
+        biggest_inins.append(list_with_size[i][0])
+
+    print('Biggest isins', biggest_inins)
+    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1", index_col="Unnamed: 0")[biggest_inins]
 
     cov_mat = df.cov() * 12
     # print(cov_mat)
+
 
     # Simulating 5000 portfolios
     num_port = 50000
