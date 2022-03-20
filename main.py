@@ -28,6 +28,7 @@ def get_relevant_isins_and_montly_returns():
     for stock in stocks_without_data:
         isin_list.remove(stock)
     print('# of firms used: ', len(isin_list))
+    
     return isin_list, monthly_returns_dataframe
 
 def plot_dict(return_volatility_dict):
@@ -46,6 +47,41 @@ def plot_dict(return_volatility_dict):
     print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
+
+def plot_dict_task7(return_volatility_dict):
+    # To plot size against return and volatility
+    size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
+    dict_with_size = {}
+    intersect = list(set(size_sheet.columns.to_list()) & set(return_volatility_dict.keys()))
+    for isin in intersect:
+        try:
+            a = size_sheet[isin].mean()
+            b = int(a)
+            c = return_volatility_dict[isin]
+            dict_with_size[isin] = c + (a,)
+        except:
+            continue
+    x_array, y_array, z_array = np.array([]), np.array([]), np.array([])
+    for value in dict_with_size.values():
+        print(value)
+        x, y, z = value[0], value[1], value[2]
+        # plt.plot(x, y, 'bo', ms=0.5)
+        x_array = np.append(x_array,[x])
+        y_array = np.append(y_array,[y])
+        z_array = np.append(y_array,[y])
+    # z = np.polyfit(x_array, y_array, 1)
+    # p = np.poly1d(z)
+    plt.xlabel('Annualized volatility')
+    plt.ylabel('Annualized average return')
+
+
+    plt.scatter(x_array, y_array, s=200, c=z_array[:-1], cmap='gray')
+    print("Close diagram or press ctrl/cmd + c in terminal to quit program")
+    plt.show()
+
+
+    
+
 def get_return_and_volatility(isin_list, monthly_returns_dataframe):
     return_volatility_dict = {}
     # Calculating annualized average return and volatility
@@ -62,18 +98,18 @@ def get_return_and_volatility(isin_list, monthly_returns_dataframe):
             yearly_returns.append(yearly_return)
             months -= 12
         # Calculates annualized_average_return_in_percentage
-        if len(yearly_returns) > 0:
+        if len(monthly_returns) > 0:
             partial_calculation_1 = 1
-            for yearly_return in yearly_returns:
-                partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
-            partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
+            for monthly_return in monthly_returns:
+                partial_calculation_1 = partial_calculation_1 * (1 + monthly_return)
+            partial_calculation_2 = partial_calculation_1 ** (1/len(monthly_returns))
             annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
 
         # Calculates the volatility
         partial_calculation_inner_sum = 0
-        for stock_movement in stock_movements:
+        for stock_movement in yearly_returns:
             partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
-        sigma = math.sqrt(partial_calculation_inner_sum / len(stock_movements))
+        sigma = math.sqrt(partial_calculation_inner_sum / len(yearly_returns))
         volatility = math.sqrt(12) * sigma
 
         return_volatility_dict[isin] =  (volatility, annualized_average_return_in_percentage)
@@ -85,18 +121,23 @@ def task_1():
     return_volatility_dict = get_return_and_volatility(isin_list, monthly_returns_dataframe)
     # Remove huge outliers
     outliers = []
+    best_stock = ('', 0)
     for key, value in return_volatility_dict.items():
         if value[0] > 50:
             outliers.append(key)
-        if value[1] > 150:
+        elif value[1] > 150:
             outliers.append(key)
+        else:
+            if value[1] > best_stock[1] and len(monthly_returns_dataframe[key].dropna()) > 227:
+                best_stock = (key, value[1])
     for outlier in outliers:
         return_volatility_dict.pop(outlier)
+    print('Best stock: ', best_stock)
     print("Removed huge outliers: ", outliers)
     # print("Martinus stock", return_volatility_dict["AEA000201011"])
     # print("Martinus stock", return_volatility_dict["AEA001501013"])
     
-    plot_dict(return_volatility_dict)
+    plot_dict_task7(return_volatility_dict)
   
 
 # def task_2():

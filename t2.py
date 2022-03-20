@@ -22,9 +22,9 @@ def calculate_annualized_return_and_variance(portfolio_monthly_returns):
     annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
     # Calculates the volatility
     partial_calculation_inner_sum = 0
-    for stock_movement in portfolio_monthly_returns:
-        partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
-    sigma = math.sqrt(partial_calculation_inner_sum / len(portfolio_monthly_returns))
+    for y_return in yearly_returns:
+        partial_calculation_inner_sum += (y_return - annualized_average_return_in_percentage*0.01) ** 2
+    sigma = math.sqrt(partial_calculation_inner_sum / len(yearly_returns))
     volatility = math.sqrt(12) * sigma
     return annualized_average_return_in_percentage, volatility
 
@@ -122,6 +122,22 @@ def main():
     sr_vw = float((annualized_average_return_in_percentage_vw - avg_rf) / volatility_vw)
 
 
+    # Highest return: US64110W1027
+    portfolio_monthly_returns_best_stock = df['US64110W1027'][-168:]
+    for i in range(len(portfolio_monthly_returns_best_stock)):
+        portfolio_monthly_returns_best_stock[i] = portfolio_monthly_returns_best_stock[i] +1 
+    annualized_average_return_in_percentage_os, volatility_os = calculate_annualized_return_and_variance(portfolio_monthly_returns_best_stock)
+    print("Annualized average return one stock portfolio: ", annualized_average_return_in_percentage_os)
+    print("Annualized volatility one stock portfolio: ", volatility_os)
+
+    # Best after two years TH0168A10Z01
+    portfolio_monthly_returns_best_2y = df['TH0168A10Z01'][-168:]
+    for i in range(len(portfolio_monthly_returns_best_2y)):
+        portfolio_monthly_returns_best_2y[i] = portfolio_monthly_returns_best_2y[i] +1 
+    annualized_average_return_in_percentage_2y, volatility_2y = calculate_annualized_return_and_variance(portfolio_monthly_returns_best_2y)
+    print("Annualized average return one stock 2yr portfolio: ", annualized_average_return_in_percentage_2y)
+    print("Annualized volatility one stock 2yr portfolio: ", volatility_2y)
+
     print("Annualized average return value-weighted portfolio: ", annualized_average_return_in_percentage_vw)
     print("Annualized volatility value-weighted portfolio: ", volatility_vw)
     print("Max return value-weighted portfolio: ", max_return_vw)
@@ -138,15 +154,31 @@ def main():
     # Plot results
     monthly_returns_in_percentage_equally_weighted = np.array(portfolio_monthly_returns_equally_weighted) * 100
     monthly_returns_in_percentage_value_weighted = np.array(portfolio_monthly_returns_value_weighted) * 100
+    monthly_returns_in_percentage_best_stock = np.array(portfolio_monthly_returns_best_stock) * 100
+    monthly_returns_in_percentage_2y = np.array(portfolio_monthly_returns_best_2y) * 100
     plt.plot(monthly_returns_in_percentage_equally_weighted, label='Equally weighted')
     plt.plot(monthly_returns_in_percentage_value_weighted, label='Value weighted')
+    plt.plot(monthly_returns_in_percentage_best_stock, label='One best stock')
+    plt.plot(monthly_returns_in_percentage_2y, label='Best stock after 2yrs')
     plt.xlabel('Annualized volatility')
     plt.ylabel('Annualized average return')
     plt.legend()
     plt.show()
 
 
+def task4():
+    random_firms = ['BRTNLPACNPR0', 'KR7030200000', 'GRS294003009', 'HU0000073507', 'MYL3735OO007',
+    'PK0067901022', 'TH0068010Z07', 'MXP4987V1378', 'PLTLKPL00017', 'TW0002384005', 'BROIBRACNPR8',
+    'ZAE000161832', 'ZAE000096541', 'HK0267001375', 'MXP740451010', 'MYL1562OO007', 'PLBPH0000019',
+    'KR7008060006', 'CLP9796J1008', 'MYL4588OO009', 'CNE0000005Q7', 'MYL4197OO009', 'MYL6033OO004',
+    'TW0002353000', 'CNE000001139', 'PHY6028G1361', 'SA0007879097', 'CNE000000DD4', 'TW0002801008',
+    'CNE0000009B1', 'SA0007879782', 'CLP0939W1081', 'PHY0967S1694', 'CNE0000018X6', 'MXP001691213',
+    'CNE000000B42', 'TW0002347002', 'CLP3880F1085', 'TW0002915006', 'TW0002356003', 'CNE000001733',
+    'INE257A01026', 'TW0001301000', 'KR7020560009', 'TW0001717007', 'CNE000000KT5', 'RU0007661625',
+    'KR7035760008', 'CNE000000Q29', 'CNE000001782']    
     
+
 
 if __name__ == "__main__":
     main()
+    task4()
