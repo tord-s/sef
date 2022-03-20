@@ -46,6 +46,37 @@ def plot_dict(return_volatility_dict):
     print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
+def plot_dict_task7(return_volatility_dict):
+    # To plot size against return and volatility
+    size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
+    dict_with_size = {}
+    intersect = list(set(size_sheet.columns.to_list()) & set(return_volatility_dict.keys()))
+    for isin in intersect:
+        try:
+            a = size_sheet[isin].mean()
+            b = int(a)
+            c = return_volatility_dict[isin]
+            dict_with_size[isin] = c + (a,)
+        except:
+            continue
+    x_array, y_array, z_array = np.array([]), np.array([]), np.array([])
+    for value in dict_with_size.values():
+        print(value)
+        x, y, z = value[0], value[1], value[2]
+        # plt.plot(x, y, 'bo', ms=0.5)
+        x_array = np.append(x_array,[x])
+        y_array = np.append(y_array,[y])
+        z_array = np.append(y_array,[y])
+    # z = np.polyfit(x_array, y_array, 1)
+    # p = np.poly1d(z)
+    plt.xlabel('Annualized volatility')
+    plt.ylabel('Annualized average return')
+
+
+    plt.scatter(x_array, y_array, s=20, c=z_array[:-1], cmap='gray')
+    print("Close diagram or press ctrl/cmd + c in terminal to quit program")
+    plt.show()
+
 def get_return_and_volatility(isin_list, monthly_returns_dataframe):
     return_volatility_dict = {}
     # Calculating annualized average return and volatility
@@ -96,7 +127,7 @@ def task_1():
     # print("Martinus stock", return_volatility_dict["AEA000201011"])
     # print("Martinus stock", return_volatility_dict["AEA001501013"])
     
-    plot_dict(return_volatility_dict)
+    plot_dict_task7(return_volatility_dict)
   
 
 # def task_2():
