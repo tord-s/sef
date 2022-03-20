@@ -66,14 +66,14 @@ def plot_dict_task7(return_volatility_dict):
         # plt.plot(x, y, 'bo', ms=0.5)
         x_array = np.append(x_array,[x])
         y_array = np.append(y_array,[y])
-        z_array = np.append(y_array,[y])
+        z_array = np.append(y_array,[z])
     # z = np.polyfit(x_array, y_array, 1)
     # p = np.poly1d(z)
     plt.xlabel('Annualized volatility')
     plt.ylabel('Annualized average return')
 
 
-    plt.scatter(x_array, y_array, s=20, c=z_array[:-1], cmap='gray')
+    plt.scatter(x_array, y_array, s=30, c=z_array[:-1], cmap='gray')
     print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
