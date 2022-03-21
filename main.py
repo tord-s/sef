@@ -137,7 +137,7 @@ def task_1():
     # print("Martinus stock", return_volatility_dict["AEA000201011"])
     # print("Martinus stock", return_volatility_dict["AEA001501013"])
     
-    plot_dict_task7(return_volatility_dict)
+    plot_dict(return_volatility_dict)
   
 
 # def task_2():

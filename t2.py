@@ -152,15 +152,15 @@ def main():
 
 
     # Plot results
-    monthly_returns_in_percentage_equally_weighted = np.array(portfolio_monthly_returns_equally_weighted) * 100
-    monthly_returns_in_percentage_value_weighted = np.array(portfolio_monthly_returns_value_weighted) * 100
-    monthly_returns_in_percentage_best_stock = np.array(portfolio_monthly_returns_best_stock) * 100
-    monthly_returns_in_percentage_2y = np.array(portfolio_monthly_returns_best_2y) * 100
+    monthly_returns_in_percentage_equally_weighted = np.array(portfolio_monthly_returns_equally_weighted) - 1
+    monthly_returns_in_percentage_value_weighted = np.array(portfolio_monthly_returns_value_weighted) -1 
+    monthly_returns_in_percentage_best_stock = np.array(portfolio_monthly_returns_best_stock) - 1 
+    monthly_returns_in_percentage_2y = np.array(portfolio_monthly_returns_best_2y) - 1
     plt.plot(monthly_returns_in_percentage_equally_weighted, label='Equally weighted')
     plt.plot(monthly_returns_in_percentage_value_weighted, label='Value weighted')
-    plt.plot(monthly_returns_in_percentage_best_stock, label='One best stock')
-    plt.plot(monthly_returns_in_percentage_2y, label='Best stock after 2yrs')
-    plt.xlabel('Annualized volatility')
+    # plt.plot(monthly_returns_in_percentage_best_stock, label='One best stock')
+    # plt.plot(monthly_returns_in_percentage_2y, label='Best stock after 2yrs')
+    plt.xlabel('Time in months')
     plt.ylabel('Annualized average return')
     plt.legend()
     plt.show()
