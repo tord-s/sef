@@ -62,7 +62,7 @@ def plot_dict_task7(return_volatility_dict):
     x_array, y_array, z_array = np.array([]), np.array([]), np.array([])
     for value in dict_with_size.values():
         print(value)
-        x, y, z = value[0], value[1], value[2]
+        x, y, z = value[0], value[1] * 0.01, value[2]
         # plt.plot(x, y, 'bo', ms=0.5)
         x_array = np.append(x_array,[x])
         y_array = np.append(y_array,[y])
