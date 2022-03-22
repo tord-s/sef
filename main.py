@@ -34,7 +34,7 @@ def plot_dict(return_volatility_dict):
     # Plot results in scatter plot
     x_array, y_array = np.array([]), np.array([]) 
     for value in return_volatility_dict.values():
-        x, y = value[0], value[1]
+        x, y = value[0], value[1] * 0.01
         plt.plot(x, y, 'bo', ms=0.5)
         x_array = np.append(x_array,[x])
         y_array = np.append(y_array,[y])
