@@ -20,24 +20,15 @@ def main():
     # print("Before Gov filter ", len(isin_list))
 
     filtered_isin_with_gov = []
-
-    # TODO: Filter on ones with governence score
     gov_df = pd.read_excel("data/Gov.xlsx", sheet_name="Feuil1")
-    # print(gov_df.columns.values.tolist())
     all_isin_with_gov = gov_df.columns.values.tolist()
     
     for isin in all_isin_with_gov:
         if len(gov_df[isin].dropna()) > 0 and isin in isin_list:
             filtered_isin_with_gov.append(isin)
-        # if isin in isin_list:
-        #     filtered_isin_with_gov.append(isin)
-    print(len(filtered_isin_with_gov))
 
     df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")
-
     df = df.dropna(axis='columns')
-
-    biggest_return = ('Nan', 0)
 
     returns_list = []
     for isin in filtered_isin_with_gov:
@@ -46,11 +37,17 @@ def main():
         except:
             continue
     
-
     returns_list.sort(key=lambda y: y[1])
 
-    print(returns_list[-3])
-    print('Biggest return: ', biggest_return)
+    l = len(returns_list)//5
+    returns_quintiles = [returns_list[0:l],
+    returns_list[l:2*l],
+    returns_list[2*l:3*l],
+    returns_list[3*l:4*l],
+    returns_list[4*l:],
+    ]
+
+    print('Results quin ', returns_quintiles)
 
     lowest_isins = []
 
