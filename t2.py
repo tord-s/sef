@@ -122,16 +122,16 @@ def main():
     sr_vw = float((annualized_average_return_in_percentage_vw - avg_rf) / volatility_vw)
 
 
-    # Highest return: US64110W1027
-    portfolio_monthly_returns_best_stock = df['US64110W1027'][-168:]
+    # Highest return: TH0168A10Z01
+    portfolio_monthly_returns_best_stock = df['TH0168A10Z01'][-168:]
     for i in range(len(portfolio_monthly_returns_best_stock)):
         portfolio_monthly_returns_best_stock[i] = portfolio_monthly_returns_best_stock[i] +1 
     annualized_average_return_in_percentage_os, volatility_os = calculate_annualized_return_and_variance(portfolio_monthly_returns_best_stock)
     print("Annualized average return one stock portfolio: ", annualized_average_return_in_percentage_os)
     print("Annualized volatility one stock portfolio: ", volatility_os)
 
-    # Best after two years TH0168A10Z01
-    portfolio_monthly_returns_best_2y = df['TH0168A10Z01'][-168:]
+    # Best after two years INE604D01023
+    portfolio_monthly_returns_best_2y = df['INE604D01023'][-168:]
     for i in range(len(portfolio_monthly_returns_best_2y)):
         portfolio_monthly_returns_best_2y[i] = portfolio_monthly_returns_best_2y[i] +1 
     annualized_average_return_in_percentage_2y, volatility_2y = calculate_annualized_return_and_variance(portfolio_monthly_returns_best_2y)
@@ -158,8 +158,8 @@ def main():
     monthly_returns_in_percentage_2y = np.array(portfolio_monthly_returns_best_2y) - 1
     plt.plot(monthly_returns_in_percentage_equally_weighted, label='Equally weighted')
     plt.plot(monthly_returns_in_percentage_value_weighted, label='Value weighted')
-    # plt.plot(monthly_returns_in_percentage_best_stock, label='One best stock')
-    # plt.plot(monthly_returns_in_percentage_2y, label='Best stock after 2yrs')
+    plt.plot(monthly_returns_in_percentage_best_stock, label='One best stock')
+    plt.plot(monthly_returns_in_percentage_2y, label='Best stock after 2yrs')
     plt.xlabel('Time in months')
     plt.ylabel('Annualized average return')
     plt.legend()

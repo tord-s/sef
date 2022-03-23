@@ -33,21 +33,24 @@ def main():
         #     filtered_isin_with_gov.append(isin)
     print(len(filtered_isin_with_gov))
 
-    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")[0:24]
+    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1")
 
     df = df.dropna(axis='columns')
+
+    biggest_return = ('Nan', 0)
 
     returns_list = []
     for isin in filtered_isin_with_gov:
         try:
-            returns_list.append((isin, df[isin].sum()))
+            returns_list.append((isin, df[isin][:24].sum()))
         except:
             continue
     
 
     returns_list.sort(key=lambda y: y[1])
 
-    print(returns_list[-1])
+    print(returns_list[-3])
+    print('Biggest return: ', biggest_return)
 
     lowest_isins = []
 
