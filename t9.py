@@ -130,25 +130,45 @@ def main():
 
 
     for month_nr in range(168):
-        size_tuples = []
-        isin_sorted_on_size = []
+        # size_tuples = []
+        # isin_sorted_on_size = []
+        # for isin in df.columns.to_list():
+        #     try:
+        #         size = size_sheet[isin][month_nr]
+        #         b = int(size)
+        #         size_tuples.append([isin, size])
+        #     except:
+        #         continue
+        # # print(size_tuples)
+        # size_tuples.sort(key=lambda y: y[1])
+        # for value in size_tuples:
+        #     isin_sorted_on_size.append(value[0])
+        # l = len(isin_sorted_on_size)//5
+        return_tuples = []
+        isin_sorted_on_return = []
         for isin in df.columns.to_list():
             try:
-                size = size_sheet[isin][month_nr]
-                b = int(size)
-                size_tuples.append([isin, size])
+                return_last_12 = 1
+                return_last_12_list = df[isin][max(0,month_nr-12):month_nr]
+                for stock_return in return_last_12_list:
+                    b = int(stock_return)
+                    return_last_12 = return_last_12 * stock_return
+                    return_last_12 -= 1
+                b = int(return_last_12)
+                return_tuples.append([isin, return_last_12])
             except:
                 continue
         # print(size_tuples)
-        size_tuples.sort(key=lambda y: y[1])
-        for value in size_tuples:
-            isin_sorted_on_size.append(value[0])
-        l = len(isin_sorted_on_size)//5
-        returns_quintiles = [isin_sorted_on_size[0:l],
-        isin_sorted_on_size[l:2*l],
-        isin_sorted_on_size[2*l:3*l],
-        isin_sorted_on_size[3*l:4*l],
-        isin_sorted_on_size[4*l:],
+        return_tuples.sort(key=lambda y: y[1])
+        for value in return_tuples:
+            isin_sorted_on_return.append(value[0])
+        l = len(isin_sorted_on_return)//5
+
+        returns_quintiles = [isin_sorted_on_return[0:l],
+        isin_sorted_on_return[l:2*l],
+        isin_sorted_on_return[2*l:3*l],
+        isin_sorted_on_return[3*l:4*l],
+        isin_sorted_on_return[4*l:],
         ]
         for i in range(5):
             q_df = df[returns_quintiles[i]]
