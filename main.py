@@ -51,29 +51,50 @@ def plot_dict_task7(return_volatility_dict):
     size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
     dict_with_size = {}
     intersect = list(set(size_sheet.columns.to_list()) & set(return_volatility_dict.keys()))
+    average_value = 13280506440
+    small_firms = {}
+    medium_firms = {}
+    large_firms = {}
+    # print(size_sheet.mean().mean())
     for isin in intersect:
         try:
             a = size_sheet[isin].mean()
             b = int(a)
             c = return_volatility_dict[isin]
-            dict_with_size[isin] = c + (a,)
+            if a > 4*average_value:
+                large_firms[isin] = c + (a,)
+            elif a > average_value*0.2:
+                medium_firms[isin] = c + (a,)
+                # print(medium_firms[isin])
+            else: 
+                small_firms[isin] = c + (a,)
         except:
             continue
-    x_array, y_array, z_array = np.array([]), np.array([]), np.array([])
-    for value in dict_with_size.values():
-        print(value)
-        x, y, z = value[0], value[1] * 0.01, value[2]
-        # plt.plot(x, y, 'bo', ms=0.5)
-        x_array = np.append(x_array,[x])
-        y_array = np.append(y_array,[y])
-        z_array = np.append(y_array,[z])
-    # z = np.polyfit(x_array, y_array, 1)
-    # p = np.poly1d(z)
+
+    x_array_m, y_array_m = np.array([]), np.array([])
+    for value in medium_firms.values():
+        x, y = value[0], value[1] * 0.01
+        x_array_m = np.append(x_array_m,[x])
+        y_array_m = np.append(y_array_m,[y])
+    plt.scatter(x_array_m, y_array_m, c='green', s=3, label='Medium companies')
+
+    x_array_s, y_array_s = np.array([]), np.array([])
+    for value in small_firms.values():
+        x, y = value[0], value[1] * 0.01
+        x_array_s = np.append(x_array_s,[x])
+        y_array_s = np.append(y_array_s,[y])
+    plt.scatter(x_array_s, y_array_s, c='blue', s=5, label='Small companies')
+    
+    x_array_l, y_array_l = np.array([]), np.array([])
+    for value in large_firms.values():
+        x, y = value[0], value[1] * 0.01
+        x_array_l = np.append(x_array_l,[x])
+        y_array_l = np.append(y_array_l,[y])
+    plt.scatter(x_array_l, y_array_l, c='red', s=5, label='Big companies')
+
+    plt.legend()
     plt.xlabel('Annualized volatility')
     plt.ylabel('Annualized average return')
-
-
-    plt.scatter(x_array, y_array, s=30, c=z_array[:-1], cmap='gray')
     print("Close diagram or press ctrl/cmd + c in terminal to quit program")
     plt.show()
 
