@@ -67,7 +67,7 @@ def get_return_and_volatility(isin_list, monthly_returns_dataframe):
             for yearly_return in yearly_returns:
                 partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
             partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
-            annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
+            annualized_average_return_in_percentage = (partial_calculation_2 - 1)
 
         # Calculates the volatility
         partial_calculation_inner_sum = 0

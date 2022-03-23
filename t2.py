@@ -19,11 +19,11 @@ def calculate_annualized_return_and_variance(portfolio_monthly_returns):
     for yearly_return in yearly_returns:
         partial_calculation_1 = partial_calculation_1 * (1 + yearly_return)
     partial_calculation_2 = partial_calculation_1 ** (1/len(yearly_returns))
-    annualized_average_return_in_percentage = ((partial_calculation_2 - 1) * 100) - 100
+    annualized_average_return_in_percentage = (partial_calculation_2 - 1)
     # Calculates the volatility
     partial_calculation_inner_sum = 0
     for stock_movement in portfolio_monthly_returns:
-        partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage*0.01) ** 2
+        partial_calculation_inner_sum += (stock_movement - annualized_average_return_in_percentage) ** 2
     sigma = math.sqrt(partial_calculation_inner_sum / len(portfolio_monthly_returns))
     volatility = math.sqrt(12) * sigma
     return annualized_average_return_in_percentage, volatility
@@ -136,8 +136,8 @@ def main():
 
 
     # Plot results
-    monthly_returns_in_percentage_equally_weighted = np.array(portfolio_monthly_returns_equally_weighted) * 100
-    monthly_returns_in_percentage_value_weighted = np.array(portfolio_monthly_returns_value_weighted) * 100
+    monthly_returns_in_percentage_equally_weighted = np.array(portfolio_monthly_returns_equally_weighted)
+    monthly_returns_in_percentage_value_weighted = np.array(portfolio_monthly_returns_value_weighted)
     plt.plot(monthly_returns_in_percentage_equally_weighted, label='Equally weighted')
     plt.plot(monthly_returns_in_percentage_value_weighted, label='Value weighted')
     plt.xlabel('Annualized volatility')
