@@ -128,6 +128,15 @@ def main():
     all_returns_list_vw = [[],[],[],[],[]]
     all_returns_list_ew = [[],[],[],[],[]]
 
+    
+    gov_scores = pd.read_excel("data/Gov.xlsx", sheet_name="Feuil1") 
+    #Removing the date column
+    gov_scores_no_date = gov_scores.drop(gov_scores.columns[0], axis=1, inplace=False)
+    gov_mean = gov_scores_no_date.mean()
+
+    gov_mean = gov_mean.dropna()
+    gov_tuples = gov_mean.sort_values(ascending=True)
+    sorted_firms = gov_tuples.index.values.tolist()
 
     for month_nr in range(168):
         # size_tuples = []
@@ -144,9 +153,9 @@ def main():
         # for value in size_tuples:
         #     isin_sorted_on_size.append(value[0])
         # l = len(isin_sorted_on_size)//5
-        return_tuples = []
-        isin_sorted_on_return = []
-        for isin in df.columns.to_list():
+        return_dict = {}
+        isin_sorted_on_gov = []
+        for isin in sorted_firms:
             try:
                 return_last_12 = 1
                 return_last_12_list = df[isin][max(0,month_nr-12):month_nr]
@@ -155,20 +164,18 @@ def main():
                     return_last_12 = return_last_12 * stock_return
                     return_last_12 -= 1
                 b = int(return_last_12)
-                return_tuples.append([isin, return_last_12])
+                return_dict[isin] = return_last_12
             except:
                 continue
         # print(size_tuples)
-        return_tuples.sort(key=lambda y: y[1])
-        for value in return_tuples:
-            isin_sorted_on_return.append(value[0])
-        l = len(isin_sorted_on_return)//5
 
-        returns_quintiles = [isin_sorted_on_return[0:l],
-        isin_sorted_on_return[l:2*l],
-        isin_sorted_on_return[2*l:3*l],
-        isin_sorted_on_return[3*l:4*l],
-        isin_sorted_on_return[4*l:],
+        l = len(sorted_firms)//5
+
+        returns_quintiles = [sorted_firms[0:l],
+        sorted_firms[l:2*l],
+        sorted_firms[2*l:3*l],
+        sorted_firms[3*l:4*l],
+        sorted_firms[4*l:],
         ]
         for i in range(5):
             q_df = df[returns_quintiles[i]]
