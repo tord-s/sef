@@ -17,7 +17,18 @@ def main():
     'INE257A01026', 'TW0001301000', 'KR7020560009', 'TW0001717007', 'CNE000000KT5', 'RU0007661625',
     'KR7035760008', 'CNE000000Q29', 'CNE000001782'] 
 
+    gov_scores = pd.read_excel("data/Gov.xlsx", sheet_name="Feuil1") 
+    gov_mean = gov_scores[random_firms].mean()
+    gov_sorted = gov_mean.sort_values(ascending=True)
+    sorted_firms = gov_sorted.index.values.tolist()
+
+    for low_scorer in sorted_firms[:31]:
+        random_firms.remove(low_scorer)
+
     df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1", index_col="Unnamed: 0")[random_firms]
+    gov_mean = gov_scores[random_firms].mean()
+    gov_sorted = gov_mean.sort_values(ascending=True)
+    sorted_firms = gov_sorted.index.values.tolist()
 
     cov_mat = df.cov() * 12
     # print(cov_mat)
@@ -32,6 +43,9 @@ def main():
     port_risk = np.zeros((num_port))
     # Creating an empty array to store portfolio sharpe ratio
     sharpe_ratio = np.zeros((num_port))
+
+    lowest_risk = 9999
+    lowest_risk_index = 0
 
     for i in range(num_port):
         wts = np.random.uniform(size = len(df.columns.to_list()))
@@ -56,12 +70,28 @@ def main():
         port_sd = np.sqrt(np.dot(wts.T, np.dot(cov_mat, wts)))
         
         port_risk[i] = port_sd
+        if port_sd < lowest_risk:
+            lowest_risk = port_sd
+            lowest_risk_index = i
         
         # Portfolio Sharpe Ratio
         # Assuming 0% Risk Free Rate
         
         sr = port_ret / port_sd
         sharpe_ratio[i] = sr
+
+
+    gov_score = 0
+    min_var_weights = all_wts[lowest_risk_index]
+    print(sum(min_var_weights))
+    n = df.shape[1]
+    for i in range(n-1):
+        gov_score += min_var_weights[i] * gov_mean[i]
+    print(gov_score)
+
+
+
+    # print('GOV score: ' gov_mean())
         
     print('Max return', port_returns.max())
     print('Min return', port_returns.min())
