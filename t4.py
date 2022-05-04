@@ -15,28 +15,57 @@ def main():
     'CNE0000009B1', 'SA0007879782', 'CLP0939W1081', 'PHY0967S1694', 'CNE0000018X6', 'MXP001691213',
     'CNE000000B42', 'TW0002347002', 'CLP3880F1085', 'TW0002915006', 'TW0002356003', 'CNE000001733',
     'INE257A01026', 'TW0001301000', 'KR7020560009', 'TW0001717007', 'CNE000000KT5', 'RU0007661625',
-    'KR7035760008', 'CNE000000Q29', 'CNE000001782'] 
+    'KR7035760008', 'CNE000000Q29', 'CNE000001782']
 
-    
+    #Getting Gov scores
+    gov_scores = pd.read_excel("data/Gov.xlsx", sheet_name="Feuil1") 
+    #Removing the date column
+    gov_scores_no_date = gov_scores.drop(gov_scores.columns[0], axis=1, inplace=False)
+    gov_mean = gov_scores_no_date.mean()
+
+    print('GOV score before excluding portfolio: ', gov_mean[random_firms].mean())
+
+    #Removing the bottom tercile in terms of GOV score
+    random_firms_sorted_on_gov = [(random_firms[0], gov_mean[random_firms[0]])]
+    for i in range(1, len(random_firms)):
+        firm = random_firms[i]
+        score = gov_mean[firm]
+        insertion_index = 0
+        comp_score = random_firms_sorted_on_gov[insertion_index][1]
+        while(comp_score < score):
+            insertion_index += 1
+            if insertion_index >= len(random_firms_sorted_on_gov):
+                insertion_index = -1
+                break
+            comp_score = random_firms_sorted_on_gov[insertion_index][1]
+        random_firms_sorted_on_gov.insert(insertion_index, (firm, score)) 
+    excluding_worst_tercile = []
+    for i in range(len(random_firms_sorted_on_gov)//3, len(random_firms_sorted_on_gov)):
+        excluding_worst_tercile.append(random_firms_sorted_on_gov[i][0])
+   
+    #Calculating GOV score of portfolio
+    print('GOV score after excluding portfolio: ', gov_mean[excluding_worst_tercile].mean())
+ 
     # To plot size against return and volatility
-    size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
-    list_with_size = []
-    intersect = list(set(size_sheet.columns.to_list()) & set(random_firms))
-    for isin in intersect:
-        try:
-            a = size_sheet[isin].mean()
-            b = int(a)
-            list_with_size.append((isin, a))
-        except:
-            continue
-    list_with_size.sort(key=lambda y: y[1])
-    biggest_inins = []
-    print(list_with_size)
-    for i in range(len(list_with_size)//3, len(list_with_size)):
-        biggest_inins.append(list_with_size[i][0])
+    # size_sheet = pd.read_excel("data/size.xlsx", sheet_name="Feuil1")
+    # list_with_size = []
+    # intersect = list(set(size_sheet.columns.to_list()) & set(random_firms))
+    # for isin in intersect:
+    #     try:
+    #         a = size_sheet[isin].mean()
+    #         b = int(a)
+    #         list_with_size.append((isin, a))
+    #     except:
+    #         continue
+    # list_with_size.sort(key=lambda y: y[1])
+    # biggest_inins = []
+    # print(list_with_size)
+    # for i in range(len(list_with_size)//3, len(list_with_size)):
+    #     biggest_inins.append(list_with_size[i][0])
 
-    print('Biggest isins', biggest_inins)
-    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1", index_col="Unnamed: 0")[biggest_inins]
+    # print('Biggest isins', biggest_inins)
+
+    df = pd.read_excel("data/monthlyreturns.xlsx", sheet_name="Feuil1", index_col="Unnamed: 0")[excluding_worst_tercile]
 
     cov_mat = df.cov() * 12
     # print(cov_mat)
